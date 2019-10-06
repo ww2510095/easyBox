@@ -8,7 +8,7 @@
         <version>2.1.8.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>org.github.framework</groupId>
+    <groupId>com.github.ww2510095</groupId>
     <artifactId>easybox</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>easybox</name>

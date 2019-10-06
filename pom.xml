@@ -8,7 +8,7 @@
         <version>2.1.8.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>org.yly.framework</groupId>
+    <groupId>org.github.framework</groupId>
     <artifactId>easybox</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>easybox</name>

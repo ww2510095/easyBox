@@ -37,7 +37,9 @@ public class EasyBoxSecurity {
             }
         }
     }
-
+    public static void checkJavaBean(Object obj) {
+        checkJavaBean(obj,true);
+    }
     /**
      * isNull,是否验证空值
      */
@@ -61,7 +63,7 @@ public class EasyBoxSecurity {
                 continue;
             }
             if(mEasyBoxParamsTitle!=null){
-                title=mEasyBoxParamsTitle.title();
+                title=mEasyBoxParamsTitle.value();
             }else{
                 title=field.getName();
             }

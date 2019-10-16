@@ -1,6 +1,8 @@
 package org.yly.framework.easybox.mybatis.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.yly.framework.easybox.base.log.EasyBoxLogService;
+import org.yly.framework.easybox.base.log.config.EasyBoxLogAutoConfiguration;
 import org.yly.framework.easybox.cache.EasyBoxEacheService;
 import org.yly.framework.easybox.mybatis.EasyBoxSqlException;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
@@ -29,24 +31,31 @@ import java.util.*;
  */
 public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements EasyBoxServiceInterface{
 
-	private EasyBoxEacheService cEasyBoxEacheService =new EasyBoxEacheService();
+
 	private EasyBoxSqlUtil cEasyBoxSqlUtil = new EasyBoxSqlUtil();
 	@Autowired
-	private EasyBoxBaseDao cYlyBaseDao;
+	private EasyBoxBaseDao ccEasyBoxBaseDao;
+	@Autowired
+	private EasyBoxLogService cEasyBoxLogService;
+	@Autowired
+	private EasyBoxLogAutoConfiguration cEasyBoxLogAutoConfiguration;
+
+	private EasyBoxEacheService cEasyBoxEacheService =
+					new EasyBoxEacheService(ccEasyBoxBaseDao,cEasyBoxLogService,cEasyBoxLogAutoConfiguration);
 
 	/**
 	 * 根据给定的参数删除表里的数据
 	 * */
-	public void deleteByParam(String key,String value) {
+	public void deleteByParam(String key,String value) throws NoSuchFieldException, IllegalAccessException {
 		EasyBoxSql mEasyBoxSql =new EasyBoxSql();
 		mEasyBoxSql.setSql("delete "+getTableName()+" where "+key+"='"+ value+"'");
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),cYlyBaseDao);
+		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),null,null);
 	}
 	/**
 	 * 根据指定的条件更新，优点是速度比updateBySelect更快一些，
 	 * 缺点是只能更新字符型与数值型，不能更新时间日期型
 	 * */
-	public void updateByParam(String whereKey,String whereKalue,String... strs) {
+	public void updateByParam(String whereKey,String whereKalue,String... strs) throws NoSuchFieldException, IllegalAccessException {
 		if(EasyBoxStringUtil.isBlank(whereKey)||EasyBoxStringUtil.isBlank(whereKalue)) {
 			throw new RuntimeException("给定的条件或值不可为空");
 		}
@@ -60,7 +69,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		}
 		mEasyBoxSql.setSql(mEasyBoxSql.getSql().substring(0,mEasyBoxSql.getSql().length()-1));
 		mEasyBoxSql.setSql(mEasyBoxSql.getSql()+" where "+whereKey+"='"+ whereKalue+"'");
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),cYlyBaseDao);
+		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),whereKey,whereKalue);
 	}
 	/**
 	 * 根据给定的某个参数查询表里的数据，速度比起getAll更快一些
@@ -68,7 +77,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	public List<Map> getByParam(String key,String value) {
 		EasyBoxSql mEasyBoxSql =new EasyBoxSql();
 		mEasyBoxSql.setSql("select "+cEasyBoxSqlUtil.getColumnSql(null,getTableName())+" from "+getTableName()+" where "+key+"='"+ value+"'");
-		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName(),cYlyBaseDao);
+		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
 	}
 	/**
 	 * 执行一条指定的查询sql语句
@@ -76,7 +85,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * @param tabName 表名，如果有多个表名以逗号隔开，这个参数不能出现错误，否则有可能会获得脏数据
 	 * */
 	public List<Map> exeSelectSql(EasyBoxSql mEasyBoxSql,String tabName) {
-		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,tabName,cYlyBaseDao);
+		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,tabName);
 	}
 
 
@@ -198,11 +207,11 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 			mEasyBoxSql.setRows(rows);
 			mEasyBoxSql.setOrderbykey(orderbykey);
 			mEasyBoxSql.setOrderbytype(orderbytype);
-			List<Map> listmap =cEasyBoxEacheService.getAll(mEasyBoxSql,tname,cYlyBaseDao);
+			List<Map> listmap =cEasyBoxEacheService.getAll(mEasyBoxSql,tname);
 			List<?> listobj = EasyBoxBeanUtil.ListMap2ListJavaBean(listmap, t.getClass());
 			if(listobj.size()!=0) {
 				Method m=listobj.get(0).getClass().getMethod("setConuntSize", Integer.class);
-				m.invoke(listobj.get(0), cEasyBoxEacheService.getAllCount(mEasyBoxSql,tname,cYlyBaseDao));
+				m.invoke(listobj.get(0), cEasyBoxEacheService.getAllCount(mEasyBoxSql,tname));
 			}else {
 				return new ArrayList<>();
 			}
@@ -246,6 +255,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * @param rows 每一页的条数 默认10
 	 * @param orderbykey 排序的字段
 	 * @param orderbytype 排序的方式
+	 * @return List<T>
 	 * */
 	public List<T> getAll(T t,Integer page,Integer rows,String orderbykey,EasyBoxSql.orderBy orderbytype){
 		return getAll(t, page, rows,orderbykey,orderbytype,and_or.and);
@@ -255,6 +265,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * @param t 条件
 	 * @param page 当前页数 默认：1
 	 * @param rows 每一页的条数 默认10
+	 *              @return List<T>
 	 * */
 	public List<T> getAll(T t,Integer page,Integer rows,and_or _and_or){
 		return getAll(t, page, rows,null,null,_and_or);
@@ -265,6 +276,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * @param t 条件
 	 * @param page 当前页数 默认：1
 	 * @param rows 每一页的条数 默认10
+	 *  @return List<T>
 	 * */
 	public List<T> getAll(T t,Integer page,Integer rows){
 		return getAll(t, page, rows,null,null);
@@ -281,6 +293,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * 	               eq:等于
 	 * 	              like:like '%t%'
 	 * 	              auto:根据javabean自动装配
+	 *  @return String
 	 * */
 	public String getWhere(T obj, and_or _and_or, EqLike.Eq_Like _EqLike)   {
 		try {
@@ -352,6 +365,8 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	/**
 	 * 根据id获取数据
 	 * 如果id为空则返回null
+	 *  @return T
+	 * @param obj
 	 * */
 	public T getByid(T obj)  {
 		try {
@@ -361,7 +376,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 			}
 			EasyBoxSql mEasyBoxSql = new EasyBoxSql();
 			mEasyBoxSql.setSql("select "+cEasyBoxSqlUtil.getColumnSql(obj,getTableName())+" from "+getTableName()+" where "+getIdKey()+"='"+idvalue+"'");
-			List<Map> listmap = cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName(),cYlyBaseDao);
+			List<Map> listmap = cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
 			if(listmap.size()==0) {
 				return null;
 			}else {
@@ -382,6 +397,8 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * 		其他类型抛出EasyBoxCheckException
 	 * 如果是高并发项目，或者插入数据频繁的项目，不推荐Long或者Integer
 	 * 这种情况下并不是安全的操作，很有可能抛出SqlException
+	 *
+	 * 	 @param obj
 	 */
 	public void add(T obj) throws NoSuchFieldException, IllegalAccessException {
 		Class<?> clazz =obj.getClass();
@@ -395,7 +412,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 				if(mField.getType().equals(java.lang.Long.class)) {
 					mField.set(obj, System.currentTimeMillis());
 				}else if(mField.getType().equals(java.lang.Integer.class)){
-					mField.set(obj, cEasyBoxEacheService.getParamAddOne(getTableName(),mobj,cYlyBaseDao));
+					mField.set(obj, cEasyBoxEacheService.getParamAddOne(getTableName(),mobj,ccEasyBoxBaseDao));
 				}else{
 					throw new EasyBoxCheckException("未知的主键类型,请手动设置主键");
 				}
@@ -439,7 +456,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 				+ mvalue.substring(0, mvalue.length() - 1) + ")";
 		EasyBoxSql mEasyBoxSql = new EasyBoxSql();
 		mEasyBoxSql.setSql(sql);
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),cYlyBaseDao);
+		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),null,null);
 	}
 	public static boolean isBaseType(Class<?> className) {
 		if(className.isPrimitive())return true;
@@ -452,6 +469,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	/**
 	 * 更新主键以外所有的值，如果给定的值为空则将数据库更新为null
 	 * 如果主键为空，抛出EasyBoxCheckException
+	 *  @param t
 	 * */
 	public void updateAll(T t) throws IllegalAccessException, NoSuchFieldException {
 		update(t, true);
@@ -459,6 +477,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	/**
 	 * 根据主键更新不为空的值
 	 * 如果主键为空，抛出EasyBoxCheckException
+	 * @param t
 	 * */
 	public void updateBySelect(T t) throws IllegalAccessException, NoSuchFieldException {
 		update(t, false);
@@ -556,7 +575,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		sql.append("'");
 		EasyBoxSql mEasyBoxSql= new EasyBoxSql();
 		mEasyBoxSql.setSql(sql.toString());
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),cYlyBaseDao);
+		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),getIdKey(),idValue);
 
 	}
 

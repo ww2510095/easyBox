@@ -11,5 +11,5 @@ public @interface EasyBoxParamsTitle {
     /***
      * 标题
      */
-    String title();
+    String value();
 }

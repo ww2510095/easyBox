@@ -51,9 +51,9 @@ public class EasyBoxSql {
 	 * */
 	private String columns;
 	/**
-	 * 分割字符，放一些特殊的东西，防止重复
+	 * 操作的用户id，查询以外的语句此值不可为空
 	 * */
-	public static final String spStr=",;123+@#$";
+	public   String userId;
 	/**
 	 * 是否是count
 	 * */

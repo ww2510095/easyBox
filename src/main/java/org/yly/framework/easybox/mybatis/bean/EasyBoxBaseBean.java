@@ -7,7 +7,6 @@ import lombok.Data;
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */
-
 @Data
 public class EasyBoxBaseBean {
     private static final long serialVersionUID = 1L;

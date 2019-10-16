@@ -21,7 +21,7 @@ public @interface EasyBoxScan {
     /**
      * 扫描的javaBean路径
      * */
-    String beanUrl() default "";
+    String[] beanUrl() default {};
     /**
      * EasyBox的策略
      * */

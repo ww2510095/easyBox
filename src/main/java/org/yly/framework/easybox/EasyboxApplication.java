@@ -5,16 +5,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.yly.framework.easybox.base.log.config.EasyBoxLogAutoConfiguration;
+import org.yly.framework.easybox.base.user.EasyBoxUser;
+import org.yly.framework.easybox.base.user.EasyBoxUserService;
 import org.yly.framework.easybox.init.EasyBoxScan;
-import org.yly.framework.easybox.task.Member;
-import org.yly.framework.easybox.task.Members;
 
 @SpringBootApplication
-@EasyBoxScan
+@EasyBoxScan(beanUrl = {"org.yly.framework.easybox"})
 @RestController
 public class EasyboxApplication {
     @Autowired
-    private Members mMembers;
+    private EasyBoxUserService mSysUserService;
+    @Autowired
+    private EasyBoxLogAutoConfiguration mEasyBoxLogAutoConfiguration;
 
     public static void main(String[] args) {
         SpringApplication.run(EasyboxApplication.class, args);
@@ -23,19 +26,21 @@ public class EasyboxApplication {
 
     @RequestMapping("/a")
     public Object a(){
-        Member mMembe =new Member();
+        System.out.println("==========="+ mEasyBoxLogAutoConfiguration.isSave());
+
+        EasyBoxUser mMembe =new EasyBoxUser();
         mMembe.setPwd("1234");
-        return mMembers.getAll(mMembe,1,10);
+        return mSysUserService.getAll(mMembe,1,10);
     }
     static int a =12345;
     @RequestMapping("/b")
     public String b() throws Exception{
-        Member mMembe =new Member();
+        EasyBoxUser mMembe =new EasyBoxUser();
         mMembe.setUname(System.currentTimeMillis()+"");
         mMembe.setId(System.currentTimeMillis()+"");
         a=a+1;
         mMembe.setPwd(a+"");
-         mMembers.add(mMembe);
+         mSysUserService.add(mMembe);
          return "添加完成";
     }
 

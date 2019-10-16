@@ -1,19 +1,20 @@
-package org.yly.framework.easybox.task;
+package org.yly.framework.easybox.base.user;
 
 import org.springframework.stereotype.Service;
+import org.yly.framework.easybox.base.log.config.EasyBoxLogKey;
 import org.yly.framework.easybox.mybatis.service.EasyBoxBaseService;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/4 0004
+ * @date 2019/10/16 0016
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */
 @Service
-public class Members extends EasyBoxBaseService<Member> {
+@EasyBoxLogKey("type")
+public class EasyBoxUserService extends EasyBoxBaseService<EasyBoxUser> {
     @Override
     public String getTableName() {
-        return "member";
+        return "sysuser";
     }
-
 }

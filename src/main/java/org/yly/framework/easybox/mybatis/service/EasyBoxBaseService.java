@@ -4,11 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.yly.framework.easybox.base.log.EasyBoxLogService;
 import org.yly.framework.easybox.base.log.config.EasyBoxLogAutoConfiguration;
 import org.yly.framework.easybox.cache.EasyBoxEacheService;
-import org.yly.framework.easybox.mybatis.EasyBoxSqlException;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxLeftJoin;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxSql;
-import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxColumn;
 import org.yly.framework.easybox.mybatis.bean.dataInterface.EqLike;
 import org.yly.framework.easybox.mybatis.dao.EasyBoxBaseDao;
 import org.yly.framework.easybox.security.EasyBoxSecurity;
@@ -25,14 +23,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/2 0002
+ *  2019/10/2 0002
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */
 public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements EasyBoxServiceInterface{
 
 
-	private EasyBoxSqlUtil cEasyBoxSqlUtil = new EasyBoxSqlUtil();
 	@Autowired
 	private EasyBoxBaseDao ccEasyBoxBaseDao;
 	@Autowired
@@ -43,8 +40,49 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	private EasyBoxEacheService cEasyBoxEacheService =
 					new EasyBoxEacheService(ccEasyBoxBaseDao,cEasyBoxLogService,cEasyBoxLogAutoConfiguration);
 
+	@Override
+	public String getIdKey() {
+		return "id";
+	}
+
+	/**
+	 * 执行更新的sql
+	 * @param mEasyBoxSql sql内容
+	 * @param whereKey 更改的字段 where a=1 则此处为a
+	 * @param whereValue 更改的内容  where a=1 则此处为1
+	 * @throws NoSuchFieldException,IllegalAccessException
+	 * */
+	public void exeSql(EasyBoxSql mEasyBoxSql,String whereKey,String whereValue) throws NoSuchFieldException, IllegalAccessException {
+		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),whereKey,whereValue);
+	}
+	/**
+	 * 执行更新的sql
+	 * @param mEasyBoxSql sql内容
+	 * @throws NoSuchFieldException,IllegalAccessException
+	 * */
+	public void exeSql(EasyBoxSql mEasyBoxSql) throws NoSuchFieldException, IllegalAccessException {
+		exeSql(mEasyBoxSql,"1","2");
+	}
+	/**
+	 * 执行一条查询的sql
+	 * @param mEasyBoxSql sql内容
+	 * @throws NoSuchFieldException,IllegalAccessException
+	 * */
+	public List<Map> exeSelectSql(EasyBoxSql mEasyBoxSql) {
+		String ssql =mEasyBoxSql.getSql();
+		if(EasyBoxStringUtil.isBlank(ssql)){
+			throw new EasyBoxCheckException("sql主体不可为空");
+		}
+		if(ssql.toLowerCase().trim().indexOf("SELECT")!=0){
+			throw new EasyBoxCheckException("exeSelectSql方法只能执行查询sql，如果要执行增加或修改或删除请使用exeSel");
+		}
+		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
+	}
 	/**
 	 * 根据给定的参数删除表里的数据
+	 * @param key key
+	 * @param value value
+	 * @throws NoSuchFieldException,IllegalAccessException
 	 * */
 	public void deleteByParam(String key,String value) throws NoSuchFieldException, IllegalAccessException {
 		EasyBoxSql mEasyBoxSql =new EasyBoxSql();
@@ -54,6 +92,10 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	/**
 	 * 根据指定的条件更新，优点是速度比updateBySelect更快一些，
 	 * 缺点是只能更新字符型与数值型，不能更新时间日期型
+	 * @param strs strs
+	 * @param whereKalue whereKalue
+	 * @param whereKey whereKey
+	 * @throws NoSuchFieldException,IllegalAccessException
 	 * */
 	public void updateByParam(String whereKey,String whereKalue,String... strs) throws NoSuchFieldException, IllegalAccessException {
 		if(EasyBoxStringUtil.isBlank(whereKey)||EasyBoxStringUtil.isBlank(whereKalue)) {
@@ -73,10 +115,12 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 根据给定的某个参数查询表里的数据，速度比起getAll更快一些
+	 * @param key key
+	 * @param value value
 	 * */
 	public List<Map> getByParam(String key,String value) {
 		EasyBoxSql mEasyBoxSql =new EasyBoxSql();
-		mEasyBoxSql.setSql("select "+cEasyBoxSqlUtil.getColumnSql(null,getTableName())+" from "+getTableName()+" where "+key+"='"+ value+"'");
+		mEasyBoxSql.setSql("select "+EasyBoxSqlUtil.getColumnSql(null,getTableName())+" from "+getTableName()+" where "+key+"='"+ value+"'");
 		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
 	}
 	/**
@@ -91,22 +135,17 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 
 	/**
 	 * 保存或添加数据
-	 * 添加参见@like add(T)
-	 * 修改参见@like updateBySelect(T)
+	 * @param params params
+	 * 添加参见{@like add(T)}
+	 * 修改参见{@like updateBySelect(T)}
 	 * */
-	public newSaveType save(T params) {
-		try {
-			if(getByid(params)!=null) {
-				updateBySelect(params);
-				return newSaveType.update;
-			}else {
-				add(params);
-				return newSaveType.add;
-			}
-		} catch (EasyBoxCheckException e) {
-			throw new EasyBoxCheckException(e.getMessage());
-		} catch (Exception e) {
-			throw new EasyBoxSqlException(e.getMessage());
+	public newSaveType save(T params) throws NoSuchFieldException, IllegalAccessException {
+		if(getByid(params)!=null) {
+			updateBySelect(params);
+			return newSaveType.update;
+		}else {
+			add(params);
+			return newSaveType.add;
 		}
 	}
 	public enum newSaveType{
@@ -168,7 +207,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 			mEasyBoxSql.setStarTime(starTime);
 			mEasyBoxSql.setEndTime(endTime);
 			StringBuilder skey=new StringBuilder();//字段
-			skey.append(cEasyBoxSqlUtil.getColumnSql(t,getTableName()));//组装原Sql
+			skey.append(EasyBoxSqlUtil.getColumnSql(t,getTableName()));//组装原Sql
 			StringBuilder sleftjoin =new StringBuilder();//leftjoin
 			String tname = getTableName();
 			if(mListLeftJoin!=null) {
@@ -316,7 +355,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 				}
 				mField.setAccessible(true);
 				value=mField.get(obj);
-				if (value != null&&isBaseType(mField.getType())&&value.toString().trim().length()!=0){
+				if (value != null&&isBaseTypes(mField.getType())&&value.toString().trim().length()!=0){
 					sb.append(" ");
 					if(!andOr){
 						sb.append(" where ");
@@ -327,7 +366,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 					sb.append(" ")
 							.append(getTableName())
 							.append(".")
-							.append(getName(mField));
+							.append(EasyBoxSqlUtil.getColumnName(mField));
 					switch (_EqLike){
 						case eq:
 							sb.append( "='" )
@@ -375,7 +414,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 				return	null;
 			}
 			EasyBoxSql mEasyBoxSql = new EasyBoxSql();
-			mEasyBoxSql.setSql("select "+cEasyBoxSqlUtil.getColumnSql(obj,getTableName())+" from "+getTableName()+" where "+getIdKey()+"='"+idvalue+"'");
+			mEasyBoxSql.setSql("select "+EasyBoxSqlUtil.getColumnSql(obj,getTableName())+" from "+getTableName()+" where "+getIdKey()+"='"+idvalue+"'");
 			List<Map> listmap = cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
 			if(listmap.size()==0) {
 				return null;
@@ -428,7 +467,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		for (Field field2 : fields) {
 			field2.setAccessible(true);
 
-			valueKey= getName(field2);
+			valueKey= EasyBoxSqlUtil.getColumnName(field2);
 			values=field2.get(obj);
 			if(values!=null) {
 				mkey.append(valueKey);
@@ -458,8 +497,8 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		mEasyBoxSql.setSql(sql);
 		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),null,null);
 	}
-	public static boolean isBaseType(Class<?> className) {
-		if(className.isPrimitive())return true;
+	private  boolean isBaseTypes(Class<?> className) {
+		if(isBaseType(className))return true;
 		if (className.equals(java.lang.String.class) ||className.equals(java.math.BigDecimal.class)) {
 			return true;
 		}
@@ -503,14 +542,19 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
  *
  *
  * */
-	public static final String getName(Field mField){
-		EasyBoxColumn mEasyBoxColumn =mField.getAnnotation(EasyBoxColumn.class);
-		if(mEasyBoxColumn==null){
-			return mField.getName();
-		}else{
-			return mEasyBoxColumn.value();
+	public static final boolean isBaseType(Class clazz){
+		if(clazz.isPrimitive()){
+			return true;
 		}
+		try{
+			clazz.getMethod("valueOf",String.class).invoke(null,"1");
+				return true;
+		}catch (Exception e){
+			return false;
+		}
+
 	}
+
 
 	private void update(T obj, boolean updateNull) throws IllegalAccessException, NoSuchFieldException {
 		EasyBoxSecurity.checkJavaBean(obj, updateNull);//验证参数是否合法
@@ -580,7 +624,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 
 
-	private String getId(T t) throws IllegalAccessException, NoSuchFieldException {
+	public String getId(T t) throws IllegalAccessException, NoSuchFieldException {
 		if(t==null){
 			throw new EasyBoxCheckException("给定的数据不合法，不可为null");
 		}

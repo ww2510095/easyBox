@@ -2,7 +2,7 @@ package org.yly.framework.easybox.mybatis;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/3 0003
+ *  2019/10/3 0003
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */

@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/6 0006
+ *  2019/10/6 0006
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */

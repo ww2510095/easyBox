@@ -11,10 +11,23 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * javaBean内容缓存
+ *
+ * 缓存的核心工具，
+ * 如果存在redis的时候采用redis，不存在采用内存缓存
+ *      暂不支持redis
  * */
 @Data
 public class EasyBoxBeanEache {
+    /**
+     * key:sessionId
+     * value：
+     *       key:线程Id
+     *       value:用户实体
+     * */
+    private static final Map<String,Map<Long,Object>> userMap = new HashMap<>();
+    public static Map<String, Map<Long, Object>> getUserMap() {
+        return userMap;
+    }
 
     /**
      * key:表名
@@ -26,8 +39,6 @@ public class EasyBoxBeanEache {
     }
 
     /**
-     * 缓存的核心工具，
-     *  仅当启用了缓存，切redis不存在的时候采用的策略，如果有redis将使用redis
      * key:缓存方法
      * value:
      *        key:缓存sql
@@ -54,5 +65,13 @@ public class EasyBoxBeanEache {
     private static final List<RedisConfig> sListRedisConfig = new ArrayList<>();
     public static List<RedisConfig> getsListRedisConfig() {
         return sListRedisConfig;
+    }
+    /**
+     * key:表名
+     * value：简单日志表的字段
+     * */
+    private static final Map<String,String> logKey = new HashMap<>();
+    public static Map<String, String> getLogKey() {
+        return logKey;
     }
 }

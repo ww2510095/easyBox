@@ -2,6 +2,7 @@ package org.yly.framework.easybox.utils;
 
 
 import org.yly.framework.easybox.mybatis.service.EasyBoxBaseService;
+import org.yly.framework.easybox.utils.sqlUtil.EasyBoxSqlUtil;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -10,7 +11,7 @@ import java.util.*;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/2 0002
+ *  2019/10/2 0002
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  * javaBean工具
@@ -19,7 +20,7 @@ public class EasyBoxBeanUtil {
     private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");// 数据库里面的data查出来的格式
 
 
-    public static <T> T map2JavaBean(Map<String, Object> map, Class<T> clazz) throws Exception {
+    public static <T> T map2JavaBean(Map map, Class<T> clazz) throws Exception {
         if (map == null || map.size() == 0) {
             return clazz.newInstance();
         }
@@ -37,7 +38,7 @@ public class EasyBoxBeanUtil {
         for (Field field2 : listField) {
             field2.setAccessible(true);
             for (String str : se) {
-                if (str.replace("_", "").toLowerCase().equals(EasyBoxBaseService.getName(field2).toLowerCase())) {
+                if (str.replace("_", "").toLowerCase().equals(EasyBoxSqlUtil.getColumnName(field2).toLowerCase())) {
                     // String
                     if (field2.getType().equals(java.lang.String.class)) {
                         if (map.get(str) != null) {

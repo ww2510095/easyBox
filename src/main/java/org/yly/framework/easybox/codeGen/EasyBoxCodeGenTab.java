@@ -1,19 +1,18 @@
-package org.yly.framework.easybox.base.log.config;
+package org.yly.framework.easybox.codeGen;
 
 import java.lang.annotation.*;
 
 /**
  * @author 亚里亚--罗玉波
- *  2019/10/16 0016
+ * 2019/10/19 0019
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
- * 需要记录的字段,如果为空则不记录
+ * javaBeanToSql时的表名，如果是空的将取类名
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
-@Documented
 @Inherited
-public @interface EasyBoxLogKey {
-
+public @interface EasyBoxCodeGenTab {
     String value();
+    String id() default "id";
 }

@@ -11,15 +11,16 @@ import java.lang.reflect.Field;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/2 0002
+ *  2019/10/2 0002
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  * 自动装配Sql
  */
 public class EasyBoxSqlUtil {
+    private EasyBoxSqlUtil(){}
 
-    public  String getColumnSql(Object mObj,String mTabName){
-        if( EasyBoxBeanEache.getsSqlMap().get(mTabName)!=null){
+    public static final String getColumnSql(Object mObj,String mTabName){
+        if(!EasyBoxStringUtil.isBlank(EasyBoxBeanEache.getsSqlMap().get(mTabName))){
             return EasyBoxBeanEache.getsSqlMap().get(mTabName);
         }
         if(mObj==null){
@@ -92,15 +93,19 @@ public class EasyBoxSqlUtil {
     /**
      * 获取数据库里面的字段名，以默认的名字，采用注解的方式去除非字段的成员
      * */
-    private final String  getSqlParams(Field field) {
+    public static final String  getSqlParams(Field field) {
         EasyBoxNotParams mNotParams=field.getAnnotation(EasyBoxNotParams.class);
         if(mNotParams!=null){
             return null;
         }
-        EasyBoxColumn mEasyBoxColumn=field.getAnnotation(EasyBoxColumn.class);
-        if(mEasyBoxColumn!=null&&!EasyBoxStringUtil.isBlank(mEasyBoxColumn.value())){
-            return mEasyBoxColumn.value();
+        return getColumnName(field);
+    }
+    public static final String getColumnName(Field mField){
+        EasyBoxColumn mEasyBoxColumn =mField.getAnnotation(EasyBoxColumn.class);
+        if(mEasyBoxColumn==null||EasyBoxStringUtil.isBlank(mEasyBoxColumn.value())){
+            return mField.getName().toUpperCase();
+        }else{
+            return mEasyBoxColumn.value().toUpperCase();
         }
-        return field.getName();
     }
 }

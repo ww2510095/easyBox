@@ -1,7 +1,6 @@
-package org.yly.framework.easybox.base.auth.role;
+package org.yly.framework.easybox.base.auth.userRole;
 
 import lombok.Data;
-import org.yly.framework.easybox.base.log.EasyBoxLogService;
 import org.yly.framework.easybox.codeGen.EasyBoxCodeGenTab;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
 import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxParamsTitle;
@@ -15,15 +14,13 @@ import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
  * 权限树
  */
 @Data
-@EasyBoxCodeGenTab(EasyBoxRoleService.tabName)
-public class EasyBoxRole extends EasyBoxBaseBean {
+@EasyBoxCodeGenTab(EasyBoxUserRoleService.tabName)
+public class EasyBoxUserRole extends EasyBoxBaseBean {
     private String id;
-
-    @EasyBoxParamsTitle("角色名字名字")
+    @EasyBoxParamsTitle("用户id")
     @EasyBoxCheckJavaBean(notNull = true,maxLength = 64)
-    private String name;
-
-    @EasyBoxParamsTitle("菜单id")
+    private String userId;
+    @EasyBoxParamsTitle("角色id")
     @EasyBoxCheckJavaBean(notNull = true,maxLength = 64)
-    private String menuId;
+    private String roleId;
 }

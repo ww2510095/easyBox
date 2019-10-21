@@ -1,15 +1,13 @@
 package org.yly.framework.easybox.cache;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.yly.framework.easybox.base.log.EasyBoxLog;
 import org.yly.framework.easybox.base.log.EasyBoxLogService;
 import org.yly.framework.easybox.base.log.config.EasyBoxLogAutoConfiguration;
-import org.yly.framework.easybox.base.log.config.EasyBoxLogParam;
 import org.yly.framework.easybox.mybatis.EasyBoxSqlException;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxSql;
 import org.yly.framework.easybox.mybatis.dao.EasyBoxBaseDao;
 import org.yly.framework.easybox.utils.EasyBoxStringUtil;
-import org.yly.framework.easybox.utils.exception.EasyBoxCheckException;
+import org.yly.framework.easybox.utils.EasyBoxUserils;
 
 import java.util.List;
 import java.util.Map;
@@ -53,11 +51,8 @@ public class EasyBoxEacheService {
     public void exeSql(EasyBoxSql mEasyBoxSql,String tabName,String idKey,String whereKey,String whereKeyValue) throws NoSuchFieldException, IllegalAccessException {
         String sql = mEasyBoxSql.getSql().toUpperCase();
         if(sql.trim().indexOf("UPDATE")==0||sql.trim().indexOf("DELETE")==0||sql.trim().indexOf("INSERT")==0){
-            if(EasyBoxStringUtil.isBlank(mEasyBoxSql.getUserId())){
-                throw new EasyBoxCheckException("sql执行错误，操作人不可为空");
-            }
             if(cEasyBoxLogAutoConfiguration.isSave()){
-                String key = EasyBoxLogParam.getLogKey().get(tabName);
+                String key = EasyBoxBeanEache.getLogKey().get(tabName);
                 if(!EasyBoxStringUtil.isBlank(key)&&!EasyBoxStringUtil.isBlank(whereKey)){
                     EasyBoxSql mEasyBoxSqlLog =new EasyBoxSql();
                     mEasyBoxSqlLog.setSql("select "+key+" from "+tabName+" where "+whereKey+"='"+whereKeyValue+"'");
@@ -67,7 +62,7 @@ public class EasyBoxEacheService {
                                 UUID.randomUUID().toString(),
                                 tabName,
                                 System.currentTimeMillis(),
-                                mEasyBoxSql.getUserId(),
+                                EasyBoxUserils.getUser().getUserName(),
                                 mmap.get(idKey).toString(),
                                 key
                         ));

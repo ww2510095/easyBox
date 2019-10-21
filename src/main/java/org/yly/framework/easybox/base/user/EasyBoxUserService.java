@@ -6,15 +6,16 @@ import org.yly.framework.easybox.mybatis.service.EasyBoxBaseService;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/16 0016
+ *  2019/10/16 0016
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */
 @Service
 @EasyBoxLogKey("type")
 public class EasyBoxUserService extends EasyBoxBaseService<EasyBoxUser> {
+    public static final String tabName ="easy_user";
     @Override
     public String getTableName() {
-        return "sysuser";
+        return tabName;
     }
 }

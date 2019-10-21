@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/2 0002
+ *  2019/10/2 0002
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  * 检查验证
@@ -33,9 +33,9 @@ public @interface EasyBoxCheckJavaBean {
 	/**
 	 * 最小值，仅number为true时生效
 	 * */
-	long numberMin() default -99999999L;
+	long numberMin() default Integer.MIN_VALUE;
 	/**
 	 * 最大值，仅number为true时生效
 	 * */
-	long numberMax() default  99999999L;
+	long numberMax() default  Integer.MAX_VALUE;
 }

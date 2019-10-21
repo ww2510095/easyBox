@@ -10,8 +10,10 @@ import org.yly.framework.easybox.base.user.EasyBoxUser;
 import org.yly.framework.easybox.base.user.EasyBoxUserService;
 import org.yly.framework.easybox.init.EasyBoxScan;
 
+import javax.servlet.http.HttpServletRequest;
+
 @SpringBootApplication
-@EasyBoxScan(beanUrl = {"org.yly.framework.easybox"})
+@EasyBoxScan(createTab = true)
 @RestController
 public class EasyboxApplication {
     @Autowired
@@ -24,19 +26,17 @@ public class EasyboxApplication {
         System.out.println("===========");
     }
 
-    @RequestMapping("/a")
-    public Object a(){
-        System.out.println("==========="+ mEasyBoxLogAutoConfiguration.isSave());
+    @RequestMapping("api/a")
+    public Object a(HttpServletRequest mHttpServletRequest){
+       System.out.println(Thread.currentThread().getName());
 
-        EasyBoxUser mMembe =new EasyBoxUser();
-        mMembe.setPwd("1234");
-        return mSysUserService.getAll(mMembe,1,10);
+       return "1";
     }
     static int a =12345;
     @RequestMapping("/b")
     public String b() throws Exception{
         EasyBoxUser mMembe =new EasyBoxUser();
-        mMembe.setUname(System.currentTimeMillis()+"");
+        mMembe.setUserName(System.currentTimeMillis()+"");
         mMembe.setId(System.currentTimeMillis()+"");
         a=a+1;
         mMembe.setPwd(a+"");

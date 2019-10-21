@@ -1,0 +1,25 @@
+easy:
+  box:
+    log:
+      save: false
+
+spring:
+  datasource:
+    driverClassName: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@127.0.0.1:1521:ORCL
+    username: easyBox
+    password: easyBox
+  application:
+    name: api-boot-sample-security-oauth-jwt
+api:
+  boot:
+    oauth:
+       clients:
+        - clientId: user
+          clientSecret: 123456
+    security:
+      away: memory
+server:
+  port: 8001
+
+

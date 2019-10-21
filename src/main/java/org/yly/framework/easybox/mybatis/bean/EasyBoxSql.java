@@ -6,7 +6,7 @@ import org.yly.framework.easybox.utils.EasyBoxGsonUtil;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/2 0002
+ *  2019/10/2 0002
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */
@@ -50,10 +50,6 @@ public class EasyBoxSql {
 	 * 列明，分页也不采用*，但是因为有leftjoin，所以字段不确定，所以不能从缓存里取
 	 * */
 	private String columns;
-	/**
-	 * 操作的用户id，查询以外的语句此值不可为空
-	 * */
-	public   String userId;
 	/**
 	 * 是否是count
 	 * */

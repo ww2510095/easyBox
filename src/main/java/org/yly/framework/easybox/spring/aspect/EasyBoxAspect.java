@@ -14,7 +14,7 @@ import java.util.List;
 
 /**
  * @author 亚里亚--罗玉波
- * @date 2019/10/10 0010
+ * 2019/10/10 0010
  * gitHub https://github.com/ww2510095/easyBox.git
  * CSDN:https://blog.csdn.net/qq_25861361
  */
@@ -22,7 +22,7 @@ import java.util.List;
 @Component
 public class EasyBoxAspect {
 
-    @Around("this(org.yly.framework.easybox.mybatis.Controller.EasyBoxBaseController)")
+    @Around("@annotation(org.springframework.web.bind.annotation.RequestMapping)")
     public Object around(ProceedingJoinPoint pjp)throws  Throwable{
        Object[] args = pjp.getArgs();
         List<String> listErr = new ArrayList<>();

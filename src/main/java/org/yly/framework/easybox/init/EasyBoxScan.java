@@ -27,11 +27,13 @@ public @interface EasyBoxScan {
      * 如果您开启了自动创建表的功能，同样表的创建也只限于扫描的返回
      * 建议您使用您的顶级包名，如:org.yly.framework.easybox
      * 值得注意的是系统的包自带次功能，
-     * 不建议采用com这种最外层的包名，这样在启动的时候将浪费您大量的时间
+     * 不建议采用com这种最外层的包名，这样在启动的时候将浪费您不少的时间
      * */
     String[] beanUrl() default {};
     /**
      * easyBox允许在启动的时候自动创建表，这样您将不必在表的创建上花费时间
+     * 如果字段您的表需要新添加字段，只需要在javabean里面添加就可以了，
+     * easyBox将自动为您更新表，
      * 当然，如果您对表有更高的要求，如分表分库什么的那还是需要您手动更改
      * */
     boolean  createTab() default false;

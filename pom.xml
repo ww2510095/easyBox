@@ -2,11 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
+    <parent>
+	    <groupId>org.sonatype.oss</groupId>
+	    <artifactId>oss-parent</artifactId>
+	    <version>7</version>
+	</parent>
 
     <groupId>com.github.ww2510095</groupId>
     <artifactId>easybox</artifactId>
-    <version>0.2.0-RELEASE</version>
+    <version>0.2.1-RELEASE</version>
     <name>easybox</name>
     <description>简单，轻量，实用</description>
 
@@ -18,7 +23,7 @@
         <gson.version>2.8.5</gson.version><!--Gson-->
         <lombok.version>1.18.8</lombok.version><!--lombok-->
         <api.boot.version>2.1.4.RELEASE</api.boot.version><!--apiboot-->
-    </properties>
+    </properties>	
 
     <dependencies>
         <dependency>
@@ -63,11 +68,34 @@
                 <configuration>
                     <source>7</source>
                     <target>7</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <tag>master</tag>
+        <url>git@github.com:ww2510095/easybox.git</url>
+        <connection>scm:git:git@github.com:ww2510095/easybox.git</connection>
+        <developerConnection>scm:git:git@github.com:ww2510095/easybox.git</developerConnection>
+    </scm>
+    <developers>
+        <developer>
+            <name>luoyb</name>
+            <email>1401605765@qq.com</email>
+            <organization>luoyb</organization>
+        </developer>
+    </developers>
+
+   
 
 
 </project>

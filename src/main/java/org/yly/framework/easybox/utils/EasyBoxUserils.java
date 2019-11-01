@@ -37,9 +37,13 @@ public class EasyBoxUserils {
         throw new EasyBoxCheckException("登录超时");
     }
     public static final void updateUser(HttpSession mHttpSession){
+    	Object obj = getUser(mHttpSession);
+    	if(obj==null) {
+    		return;
+    	}
         Map<String, Map<Long, Object>> mmap = EasyBoxBeanEache.getUserMap();
         Map<Long, Object> mUser = new HashMap<>();
-        mUser.put(Thread.currentThread().getId(),getUser(mHttpSession));
+        mUser.put(Thread.currentThread().getId(),obj);
         mmap.put(mHttpSession.getId(),mUser);
     }
 }

@@ -1,7 +1,8 @@
 package org.yly.framework.easybox.mybatis.bean;
 
+import org.yly.framework.easybox.utils.codeGen.EasyBoxCodeGenTabKey;
+
 import lombok.Data;
-import org.yly.framework.easybox.codeGen.EasyBoxCodeGenTabKey;
 
 /**
  * @author 亚里亚--罗玉波
@@ -12,7 +13,6 @@ import org.yly.framework.easybox.codeGen.EasyBoxCodeGenTabKey;
 @Data
 @EasyBoxCodeGenTabKey
 public class EasyBoxBaseBean {
-    private static final long serialVersionUID = 1L;
     /**
      * 数据库里有多少条复合逻辑的数据，只有集合的第一条数据有值，其他都为空
      * */

@@ -14,5 +14,6 @@ import java.util.List;
 @Data
 public class EasyBoxAspectException {
     private List<String> easyBoxException;
+    
 
 }

@@ -19,6 +19,6 @@ public class EasyBoxCheckException extends RuntimeException{
     }
 
     public String toString() {
-        return "校验错误" + getMessage();
+        return "error:" + getMessage();
     }
 }

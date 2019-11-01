@@ -1,12 +1,12 @@
 package org.yly.framework.easybox.base.user;
 
-import lombok.Data;
-import org.yly.framework.easybox.base.log.EasyBoxLogService;
-import org.yly.framework.easybox.codeGen.EasyBoxCodeGenTab;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
 import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxParamsTitle;
 import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
+import org.yly.framework.easybox.utils.codeGen.EasyBoxCodeGenTab;
 import org.yly.framework.easybox.utils.sqlUtil.sqlInterface.EasyBoxDeCode;
+
+import lombok.Data;
 
 /**
  * @author 亚里亚--罗玉波
@@ -20,11 +20,11 @@ public class EasyBoxUser extends EasyBoxBaseBean {
     private String id;
 
     @EasyBoxParamsTitle("账号")
-    @EasyBoxCheckJavaBean(notNull = true,maxLength = 64)
+    @EasyBoxCheckJavaBean(maxLength = 64)
     private String userName;
 
     @EasyBoxParamsTitle("密码")
-    @EasyBoxCheckJavaBean(notNull = true,maxLength = 64)
+    @EasyBoxCheckJavaBean(maxLength = 64)
     private String pwd;
 
     @EasyBoxParamsTitle("授权令牌")

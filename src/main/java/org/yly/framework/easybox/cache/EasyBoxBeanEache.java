@@ -1,7 +1,6 @@
 package org.yly.framework.easybox.cache;
 
 import lombok.Data;
-import org.yly.framework.easybox.cache.bean.EasyBoxMap;
 import org.yly.framework.easybox.cache.bean.EasyBoxTabMap;
 import org.yly.framework.easybox.init.RedisConfig;
 
@@ -38,16 +37,6 @@ public class EasyBoxBeanEache {
         return tabEasyBoxMap;
     }
 
-    /**
-     * key:缓存方法
-     * value:
-     *        key:缓存sql
-     *        value：结果集的json
-     * */
-    private static final EasyBoxMap eacheMap= new EasyBoxMap();
-    public static EasyBoxMap getEacheMap() {
-        return eacheMap;
-    }
 
     /**
      * key：用于存储javaben的名字

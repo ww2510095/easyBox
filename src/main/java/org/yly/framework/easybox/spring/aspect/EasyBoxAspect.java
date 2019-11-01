@@ -29,7 +29,7 @@ public class EasyBoxAspect {
         int index = -1;
        for(int i=0;i<args.length;i++){
            if(args[i]!=null&&args[i] instanceof EasyBoxAspectException){
-               if(i!=-1){
+               if(index!=-1){
                    throw new EasyBoxCheckException("出现错误，一个方法只能有一个EasyBoxAspectException参数");
                }
                index=i;
@@ -41,16 +41,16 @@ public class EasyBoxAspect {
                    listErr.add(e.getMessage());
                }
            }
-           if(listErr.size()!=0){
-                if(i==-1){
-                    throw new  EasyBoxCheckException(listErr.get(0));
-                }else{
-                    EasyBoxAspectException mEasyBoxAspectException = (EasyBoxAspectException) args[index];
-                    mEasyBoxAspectException.setEasyBoxException(listErr);
-                    args[index]=mEasyBoxAspectException;
-                }
-           }
        }
+       if(listErr.size()!=0){
+           if(index==-1){
+               throw new  EasyBoxCheckException(listErr.get(0));
+           }else{
+               EasyBoxAspectException mEasyBoxAspectException = (EasyBoxAspectException) args[index];
+               mEasyBoxAspectException.setEasyBoxException(listErr);
+               args[index]=mEasyBoxAspectException;
+           }
+      }
         Object obj=pjp.proceed(args);
         return obj;
     }

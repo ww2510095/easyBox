@@ -1,9 +1,20 @@
 package org.yly.framework.easybox.mybatis.service;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.yly.framework.easybox.base.log.EasyBoxLog;
 import org.yly.framework.easybox.base.log.EasyBoxLogService;
 import org.yly.framework.easybox.base.log.config.EasyBoxLogAutoConfiguration;
-import org.yly.framework.easybox.cache.EasyBoxEacheService;
+import org.yly.framework.easybox.cache.EasyBoxBeanEache;
+import org.yly.framework.easybox.mybatis.EasyBoxSqlException;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxLeftJoin;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxSql;
@@ -12,15 +23,12 @@ import org.yly.framework.easybox.mybatis.dao.EasyBoxBaseDao;
 import org.yly.framework.easybox.security.EasyBoxSecurity;
 import org.yly.framework.easybox.utils.EasyBoxBeanUtil;
 import org.yly.framework.easybox.utils.EasyBoxStringUtil;
+import org.yly.framework.easybox.utils.EasyBoxUserils;
 import org.yly.framework.easybox.utils.exception.EasyBoxCheckException;
 import org.yly.framework.easybox.utils.sqlUtil.EasyBoxDateUtil;
 import org.yly.framework.easybox.utils.sqlUtil.EasyBoxSqlUtil;
 import org.yly.framework.easybox.utils.sqlUtil.sqlInterface.EasyBoxDeCode;
 import org.yly.framework.easybox.utils.sqlUtil.sqlInterface.EasyBoxNotParams;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
 /**
  * @author 亚里亚--罗玉波
  *  2019/10/2 0002
@@ -31,14 +39,11 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 
 
 	@Autowired
-	private EasyBoxBaseDao ccEasyBoxBaseDao;
+	private EasyBoxBaseDao cEasyBoxBaseDao;
 	@Autowired
 	private EasyBoxLogService cEasyBoxLogService;
 	@Autowired
 	private EasyBoxLogAutoConfiguration cEasyBoxLogAutoConfiguration;
-
-	private EasyBoxEacheService cEasyBoxEacheService =
-					new EasyBoxEacheService(ccEasyBoxBaseDao,cEasyBoxLogService,cEasyBoxLogAutoConfiguration);
 
 	@Override
 	public String getIdKey() {
@@ -47,26 +52,26 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 
 	/**
 	 * 执行更新的sql
-	 * @param mEasyBoxSql sql内容
-	 * @param whereKey 更改的字段 where a=1 则此处为a
-	 * @param whereValue 更改的内容  where a=1 则此处为1
-	 * @throws NoSuchFieldException,IllegalAccessException
+	 *  mEasyBoxSql sql内容
+	 *  whereKey 更改的字段 where a=1 则此处为a
+	 *  whereValue 更改的内容  where a=1 则此处为1
+	  NoSuchFieldException,IllegalAccessException
 	 * */
 	public void exeSql(EasyBoxSql mEasyBoxSql,String whereKey,String whereValue) throws NoSuchFieldException, IllegalAccessException {
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),whereKey,whereValue);
+		exeSql(mEasyBoxSql,getTableName(),getIdKey(),whereKey,whereValue);
 	}
 	/**
 	 * 执行更新的sql
-	 * @param mEasyBoxSql sql内容
-	 * @throws NoSuchFieldException,IllegalAccessException
+	 *  mEasyBoxSql sql内容
+	  NoSuchFieldException,IllegalAccessException
 	 * */
 	public void exeSql(EasyBoxSql mEasyBoxSql) throws NoSuchFieldException, IllegalAccessException {
 		exeSql(mEasyBoxSql,"1","2");
 	}
 	/**
 	 * 执行一条查询的sql
-	 * @param mEasyBoxSql sql内容
-	 * @throws NoSuchFieldException,IllegalAccessException
+	 *  mEasyBoxSql sql内容
+	  NoSuchFieldException,IllegalAccessException
 	 * */
 	public List<Map> exeSelectSql(EasyBoxSql mEasyBoxSql) {
 		String ssql =mEasyBoxSql.getSql();
@@ -76,26 +81,26 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		if(ssql.toLowerCase().trim().indexOf("SELECT")!=0){
 			throw new EasyBoxCheckException("exeSelectSql方法只能执行查询sql，如果要执行增加或修改或删除请使用exeSel");
 		}
-		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
+		return cEasyBoxBaseDao.exeSelectSql(mEasyBoxSql);
 	}
 	/**
 	 * 根据给定的参数删除表里的数据
-	 * @param key key
-	 * @param value value
-	 * @throws NoSuchFieldException,IllegalAccessException
+	 *  key key
+	 *  value value
+	  NoSuchFieldException,IllegalAccessException
 	 * */
 	public void deleteByParam(String key,String value) throws NoSuchFieldException, IllegalAccessException {
 		EasyBoxSql mEasyBoxSql =new EasyBoxSql();
 		mEasyBoxSql.setSql("delete "+getTableName()+" where "+key+"='"+ value+"'");
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),null,null);
+		exeSql(mEasyBoxSql,getTableName(),getIdKey(),null,null);
 	}
 	/**
 	 * 根据指定的条件更新，优点是速度比updateBySelect更快一些，
 	 * 缺点是只能更新字符型与数值型，不能更新时间日期型
-	 * @param strs strs
-	 * @param whereKalue whereKalue
-	 * @param whereKey whereKey
-	 * @throws NoSuchFieldException,IllegalAccessException
+	 *  strs strs
+	 *  whereKalue whereKalue
+	 *  whereKey whereKey
+	  NoSuchFieldException,IllegalAccessException
 	 * */
 	public void updateByParam(String whereKey,String whereKalue,String... strs) throws NoSuchFieldException, IllegalAccessException {
 		if(EasyBoxStringUtil.isBlank(whereKey)||EasyBoxStringUtil.isBlank(whereKalue)) {
@@ -111,31 +116,31 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		}
 		mEasyBoxSql.setSql(mEasyBoxSql.getSql().substring(0,mEasyBoxSql.getSql().length()-1));
 		mEasyBoxSql.setSql(mEasyBoxSql.getSql()+" where "+whereKey+"='"+ whereKalue+"'");
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),whereKey,whereKalue);
+		exeSql(mEasyBoxSql,getTableName(),getIdKey(),whereKey,whereKalue);
 	}
 	/**
 	 * 根据给定的某个参数查询表里的数据，速度比起getAll更快一些
-	 * @param key key
-	 * @param value value
+	 *  key key
+	 *  value value
 	 * */
 	public List<Map> getByParam(String key,String value) {
 		EasyBoxSql mEasyBoxSql =new EasyBoxSql();
 		mEasyBoxSql.setSql("select "+EasyBoxSqlUtil.getColumnSql(null,getTableName())+" from "+getTableName()+" where "+key+"='"+ value+"'");
-		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
+		return cEasyBoxBaseDao.exeSelectSql(mEasyBoxSql);
 	}
 	/**
 	 * 执行一条指定的查询sql语句
-	 * @param mEasyBoxSql SQL
-	 * @param tabName 表名，如果有多个表名以逗号隔开，这个参数不能出现错误，否则有可能会获得脏数据
+	 *  mEasyBoxSql SQL
+	 *  tabName 表名，如果有多个表名以逗号隔开，这个参数不能出现错误，否则有可能会获得脏数据
 	 * */
 	public List<Map> exeSelectSql(EasyBoxSql mEasyBoxSql,String tabName) {
-		return cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,tabName);
+		return cEasyBoxBaseDao.exeSelectSql(mEasyBoxSql);
 	}
 
 
 	/**
 	 * 保存或添加数据
-	 * @param params params
+	 *  params params
 	 * 添加参见{@like add(T)}
 	 * 修改参见{@like updateBySelect(T)}
 	 * */
@@ -153,19 +158,19 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
-	 * @param orderbykey 排序的字段
-	 * @param orderbytype 排序的方式
-	 * @param _and_or 多个条件之间采用and还是or
-	 * @param _EqLike 多个条件之间采用的策略
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
+	 *  orderbykey 排序的字段
+	 *  orderbytype 排序的方式
+	 *  _and_or 多个条件之间采用and还是or
+	 *  _EqLike 多个条件之间采用的策略
 	 *               eq:等于
 	 *               like:like '%t%'
 	 *               auto:根据javabean自动装配
-	 * @param starTime 只查询给定时间之后的值，只支持时间戳
-	 * @param endTime 只查询给定时间之前的值，只支持时间戳
-	 * @param mLeftJoin 关联的其他表,如果为空则是单表查询
+	 *  starTime 只查询给定时间之后的值，只支持时间戳
+	 *  endTime 只查询给定时间之前的值，只支持时间戳
+	 *  mLeftJoin 关联的其他表,如果为空则是单表查询
 	 * */
 	public List<T> getAllLeftJoinOne(T t,
 									 Integer page, Integer rows,
@@ -179,19 +184,19 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
-	 * @param orderbykey 排序的字段
-	 * @param orderbytype 排序的方式
-	 * @param _and_or 多个条件之间采用and还是or
-	 * @param _EqLike 多个条件之间采用的策略
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
+	 *  orderbykey 排序的字段
+	 *  orderbytype 排序的方式
+	 *  _and_or 多个条件之间采用and还是or
+	 *  _EqLike 多个条件之间采用的策略
 	 *                eq:等于
 	 *                like:like '%t%'
 	 *                auto:根据javabean自动装配
-	 * @param starTime 只查询给定时间之后的值，只支持时间戳
-	 * @param endTime 只查询给定时间之前的值，只支持时间戳
-	 * @param mListLeftJoin 关联的其他表,如果为空则是单表查询
+	 *  starTime 只查询给定时间之后的值，只支持时间戳
+	 *  endTime 只查询给定时间之前的值，只支持时间戳
+	 *  mListLeftJoin 关联的其他表,如果为空则是单表查询
 	 * */
 	public List<T> getAllLeftJoin(T t,
 								  Integer page, Integer rows,
@@ -246,11 +251,11 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 			mEasyBoxSql.setRows(rows);
 			mEasyBoxSql.setOrderbykey(orderbykey);
 			mEasyBoxSql.setOrderbytype(orderbytype);
-			List<Map> listmap =cEasyBoxEacheService.getAll(mEasyBoxSql,tname);
+			List<Map> listmap =cEasyBoxBaseDao.getAll(mEasyBoxSql);
 			List<?> listobj = EasyBoxBeanUtil.ListMap2ListJavaBean(listmap, t.getClass());
 			if(listobj.size()!=0) {
 				Method m=listobj.get(0).getClass().getMethod("setConuntSize", Integer.class);
-				m.invoke(listobj.get(0), cEasyBoxEacheService.getAllCount(mEasyBoxSql,tname));
+				m.invoke(listobj.get(0), cEasyBoxBaseDao.getAllCount(mEasyBoxSql));
 			}else {
 				return new ArrayList<>();
 			}
@@ -263,37 +268,37 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
-	 * @param orderbykey 排序的字段
-	 * @param orderbytype 排序的方式
-	 * @param _and_or 多个条件之间采用and还是or
-	 * @param starTime 只查询给定时间之后的值，只支持时间戳
-	 * @param endTime 只查询给定时间之前的值，只支持时间戳
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
+	 *  orderbykey 排序的字段
+	 *  orderbytype 排序的方式
+	 *  _and_or 多个条件之间采用and还是or
+	 *  starTime 只查询给定时间之后的值，只支持时间戳
+	 *  endTime 只查询给定时间之前的值，只支持时间戳
 	 * */
 	public List<T> getAllSplitTime(T t, Integer page, Integer rows, String orderbykey, EasyBoxSql.orderBy orderbytype, and_or _and_or, Long starTime, Long endTime){
 		return getAllLeftJoin(t, page, rows, orderbykey, orderbytype, _and_or, EqLike.Eq_Like.auto,starTime, endTime, null);
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
-	 * @param orderbykey 排序的字段
-	 * @param orderbytype 排序的方式
-	 *  @param _and_or 多个条件之间采用and还是or
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
+	 *  orderbykey 排序的字段
+	 *  orderbytype 排序的方式
+	 *   _and_or 多个条件之间采用and还是or
 	 * */
 	public List<T> getAll(T t, Integer page, Integer rows, String orderbykey, EasyBoxSql.orderBy orderbytype, and_or _and_or){
 		return getAllSplitTime(t, page, rows, orderbykey, orderbytype, _and_or, null, null);
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
-	 * @param orderbykey 排序的字段
-	 * @param orderbytype 排序的方式
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
+	 *  orderbykey 排序的字段
+	 *  orderbytype 排序的方式
 	 * @return List<T>
 	 * */
 	public List<T> getAll(T t,Integer page,Integer rows,String orderbykey,EasyBoxSql.orderBy orderbytype){
@@ -301,9 +306,9 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
 	 *              @return List<T>
 	 * */
 	public List<T> getAll(T t,Integer page,Integer rows,and_or _and_or){
@@ -312,9 +317,9 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 根据给定的条件查询表里面的数据
-	 * @param t 条件
-	 * @param page 当前页数 默认：1
-	 * @param rows 每一页的条数 默认10
+	 *  t 条件
+	 *  page 当前页数 默认：1
+	 *  rows 每一页的条数 默认10
 	 *  @return List<T>
 	 * */
 	public List<T> getAll(T t,Integer page,Integer rows){
@@ -326,9 +331,9 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	}
 	/**
 	 * 查询指定的where条件
-	 *  @param obj 条件
-	 *  @param _and_or 采用或者还是and,默认and
-	 *  @param _EqLike 多个条件之间采用的策略,默认 auto
+	 *   obj 条件
+	 *   _and_or 采用或者还是and,默认and
+	 *   _EqLike 多个条件之间采用的策略,默认 auto
 	 * 	               eq:等于
 	 * 	              like:like '%t%'
 	 * 	              auto:根据javabean自动装配
@@ -405,7 +410,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * 根据id获取数据
 	 * 如果id为空则返回null
 	 *  @return T
-	 * @param obj
+	 *  obj
 	 * */
 	public T getByid(T obj)  {
 		try {
@@ -415,7 +420,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 			}
 			EasyBoxSql mEasyBoxSql = new EasyBoxSql();
 			mEasyBoxSql.setSql("select "+EasyBoxSqlUtil.getColumnSql(obj,getTableName())+" from "+getTableName()+" where "+getIdKey()+"='"+idvalue+"'");
-			List<Map> listmap = cEasyBoxEacheService.exeSelectSql(mEasyBoxSql,getTableName());
+			List<Map> listmap = cEasyBoxBaseDao.exeSelectSql(mEasyBoxSql);
 			if(listmap.size()==0) {
 				return null;
 			}else {
@@ -427,6 +432,8 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 
 	}
 
+
+
 	/**
 	 * 添加非空数据
 	 * id列可空
@@ -437,7 +444,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	 * 如果是高并发项目，或者插入数据频繁的项目，不推荐Long或者Integer
 	 * 这种情况下并不是安全的操作，很有可能抛出SqlException
 	 *
-	 * 	 @param obj
+	 * 	  obj
 	 */
 	public void add(T obj) throws NoSuchFieldException, IllegalAccessException {
 		Class<?> clazz =obj.getClass();
@@ -451,7 +458,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 				if(mField.getType().equals(java.lang.Long.class)) {
 					mField.set(obj, System.currentTimeMillis());
 				}else if(mField.getType().equals(java.lang.Integer.class)){
-					mField.set(obj, cEasyBoxEacheService.getParamAddOne(getTableName(),mobj,ccEasyBoxBaseDao));
+					mField.set(obj, getParamAddOne(getTableName(),mobj,cEasyBoxBaseDao));
 				}else{
 					throw new EasyBoxCheckException("未知的主键类型,请手动设置主键");
 				}
@@ -495,7 +502,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 				+ mvalue.substring(0, mvalue.length() - 1) + ")";
 		EasyBoxSql mEasyBoxSql = new EasyBoxSql();
 		mEasyBoxSql.setSql(sql);
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),null,null);
+		exeSql(mEasyBoxSql,getTableName(),getIdKey());
 	}
 	private  boolean isBaseTypes(Class<?> className) {
 		if(isBaseType(className))return true;
@@ -508,7 +515,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	/**
 	 * 更新主键以外所有的值，如果给定的值为空则将数据库更新为null
 	 * 如果主键为空，抛出EasyBoxCheckException
-	 *  @param t
+	 *   t
 	 * */
 	public void updateAll(T t) throws IllegalAccessException, NoSuchFieldException {
 		update(t, true);
@@ -516,7 +523,6 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 	/**
 	 * 根据主键更新不为空的值
 	 * 如果主键为空，抛出EasyBoxCheckException
-	 * @param t
 	 * */
 	public void updateBySelect(T t) throws IllegalAccessException, NoSuchFieldException {
 		update(t, false);
@@ -619,7 +625,7 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		sql.append("'");
 		EasyBoxSql mEasyBoxSql= new EasyBoxSql();
 		mEasyBoxSql.setSql(sql.toString());
-		cEasyBoxEacheService.exeSql(mEasyBoxSql,getTableName(),getIdKey(),getIdKey(),idValue);
+		exeSql(mEasyBoxSql,getTableName(),getIdKey(),getIdKey(),idValue);
 
 	}
 
@@ -632,5 +638,44 @@ public  abstract class EasyBoxBaseService<T extends EasyBoxBaseBean> implements 
 		mField.setAccessible(true);
 		return (String) mField.get(t);
 
+	}
+	/**
+	 * 单纯的执行一条sql，不求返回值，除了主体sql所有的参数无效
+	 * */
+	public void exeSql(EasyBoxSql mEasyBoxSql,String tabName,String idKey,String whereKey,String whereKeyValue) throws NoSuchFieldException, IllegalAccessException {
+		String sql = mEasyBoxSql.getSql().toUpperCase();
+		if(sql.trim().indexOf("UPDATE")==0||sql.trim().indexOf("DELETE")==0||sql.trim().indexOf("INSERT")==0){
+			if(cEasyBoxLogAutoConfiguration.isSave()){
+				String key = EasyBoxBeanEache.getLogKey().get(tabName);
+				if(!EasyBoxStringUtil.isBlank(key)&&!EasyBoxStringUtil.isBlank(whereKey)){
+					EasyBoxSql mEasyBoxSqlLog =new EasyBoxSql();
+					mEasyBoxSqlLog.setSql("select "+key+" from "+tabName+" where "+whereKey+"='"+whereKeyValue+"'");
+					List<Map> listMap =cEasyBoxBaseDao.exeSelectSql(mEasyBoxSql);
+					for(Map mmap:listMap){
+						cEasyBoxLogService.add(new EasyBoxLog(
+								UUID.randomUUID().toString(),
+								tabName,
+								System.currentTimeMillis(),
+								EasyBoxUserils.getUser().getUserName(),
+								mmap.get(idKey).toString(),
+								key
+						));
+					}
+
+				}
+			}
+		}
+		cEasyBoxBaseDao.exeSql(mEasyBoxSql);
+	}
+	/**
+	 * 得到对应的参数的值+1
+	 * */
+	public Integer getParamAddOne(String tabName,String column,EasyBoxBaseDao cYlyBaseDao){
+		try{
+			String sql = "select nvl(max(to_number("+column+")),0)+1 from "+tabName;
+			return cYlyBaseDao.getParamAddOne(sql);
+		}catch (Exception e){
+			throw new EasyBoxSqlException("给定字段"+column+"错误，该列不存在或者不能换换为number");
+		}
 	}
 }

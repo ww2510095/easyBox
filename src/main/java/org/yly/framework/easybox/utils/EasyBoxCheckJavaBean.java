@@ -2,6 +2,8 @@ package org.yly.framework.easybox.utils;
 
 import java.lang.annotation.*;
 
+import lombok.ToString;
+
 /**
  * @author 亚里亚--罗玉波
  *  2019/10/2 0002
@@ -38,4 +40,5 @@ public @interface EasyBoxCheckJavaBean {
 	 * 最大值，仅number为true时生效
 	 * */
 	long numberMax() default  Integer.MAX_VALUE;
+	
 }

@@ -1,10 +1,11 @@
 package org.yly.framework.easybox.base.auth.userRole;
 
-import lombok.Data;
-import org.yly.framework.easybox.codeGen.EasyBoxCodeGenTab;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
 import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxParamsTitle;
 import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
+import org.yly.framework.easybox.utils.codeGen.EasyBoxCodeGenTab;
+
+import lombok.Data;
 
 /**
  * @author 亚里亚--罗玉波

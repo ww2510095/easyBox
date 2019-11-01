@@ -1,4 +1,4 @@
-package org.yly.framework.easybox.codeGen;
+package org.yly.framework.easybox.utils.codeGen;
 
 import java.lang.annotation.*;
 

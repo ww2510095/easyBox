@@ -1,17 +1,17 @@
-package org.yly.framework.easybox.codeGen;
-
-import org.yly.framework.easybox.init.scan.EasyBoxInit;
-import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxParamsTitle;
-import org.yly.framework.easybox.mybatis.service.EasyBoxBaseService;
-import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
-import org.yly.framework.easybox.utils.EasyBoxStringUtil;
-import org.yly.framework.easybox.utils.exception.EasyBoxCheckException;
-import org.yly.framework.easybox.utils.sqlUtil.EasyBoxSqlUtil;
-import org.yly.framework.easybox.utils.sqlUtil.sqlInterface.EasyBoxNotParams;
+package org.yly.framework.easybox.utils.codeGen;
 
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
+
+import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxParamsTitle;
+import org.yly.framework.easybox.mybatis.service.EasyBoxBaseService;
+import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
+import org.yly.framework.easybox.utils.EasyBoxClazzUtils;
+import org.yly.framework.easybox.utils.EasyBoxStringUtil;
+import org.yly.framework.easybox.utils.exception.EasyBoxCheckException;
+import org.yly.framework.easybox.utils.sqlUtil.EasyBoxSqlUtil;
+import org.yly.framework.easybox.utils.sqlUtil.sqlInterface.EasyBoxNotParams;
 
 /**
  * @author 亚里亚--罗玉波
@@ -29,7 +29,7 @@ public class EasyBoxJavaBeanToSql {
      * @param packageName 需要解锁的包名
      * */
     public   String createAllTab(String packageName){
-            List<String> liststr = EasyBoxInit.getClassNameA(packageName);
+            List<String> liststr = EasyBoxClazzUtils.getClazzName(packageName);
             int ok=0;
             int no=0;
             int tab=0;

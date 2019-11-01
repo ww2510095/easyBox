@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.yly.framework.easybox.base.RequestType;
 import org.yly.framework.easybox.mybatis.bean.EasyBoxBaseBean;
 import org.yly.framework.easybox.mybatis.service.EasyBoxBaseService;
+import org.yly.framework.easybox.spring.bean.EasyBoxAspectException;
 
 /**
  * @author 亚里亚--罗玉波
@@ -67,12 +68,12 @@ public abstract class EasyBoxBaseController<T extends EasyBoxBaseBean> {
         return sendTrueMsg((mnewSaveType== EasyBoxBaseService.newSaveType.add?"添加":"修改")+"成功");
     }
     @RequestMapping("deleteById")
-    public RequestType delete(T t)throws Exception {
+    public RequestType delete(T t,EasyBoxAspectException mEasyBoxAspectException)throws Exception {
         getService().deleteByParam(getService().getIdKey(),getService().getId(t));
         return sendTrueMsg("删除成功");
     }
-    @RequestMapping("getAll")
-    public RequestType getAll(T t,Integer page,Integer rows) {
+    @RequestMapping("list")
+    public RequestType list(T t,Integer page,Integer rows,EasyBoxAspectException mEasyBoxAspectException) {
         return sendTrueData(getService().getAll(t,page,rows));
     }
 

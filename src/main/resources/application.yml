@@ -6,9 +6,9 @@ easy:
 spring:
   datasource:
     driverClassName: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@127.0.0.1:1521:ORCL
-    username: easyBox
-    password: easyBox
+    url: jdbc:oracle:thin:@218.70.107.85:1521:ORCL
+    username: ares
+    password: ares
   application:
     name: api-boot-sample-security-oauth-jwt
 api:

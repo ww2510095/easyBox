@@ -38,7 +38,7 @@ public class EasyBoxBeanUtil {
         for (Field field2 : listField) {
             field2.setAccessible(true);
             for (String str : se) {
-                if (str.replace("_", "").toLowerCase().equals(EasyBoxSqlUtil.getColumnName(field2).toLowerCase())) {
+                if (str.toLowerCase().equals(EasyBoxSqlUtil.getColumnName(field2).toLowerCase())) {
                     // String
                     if (field2.getType().equals(java.lang.String.class)) {
                         if (map.get(str) != null) {

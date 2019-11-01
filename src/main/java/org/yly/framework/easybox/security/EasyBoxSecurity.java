@@ -1,11 +1,11 @@
 package org.yly.framework.easybox.security;
 
-import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
+import java.lang.reflect.Field;
+
 import org.yly.framework.easybox.mybatis.bean.dataInterface.EasyBoxParamsTitle;
+import org.yly.framework.easybox.utils.EasyBoxCheckJavaBean;
 import org.yly.framework.easybox.utils.EasyBoxStringUtil;
 import org.yly.framework.easybox.utils.exception.EasyBoxCheckException;
-
-import java.lang.reflect.Field;
 
 /**
  * @author 亚里亚--罗玉波
@@ -24,13 +24,15 @@ public class EasyBoxSecurity {
     public static void sqlValueInspect(String value, String e) {
         int a = value.indexOf(" or ");
         if (a > 0) {
-            String _value = value.substring(a + 4, value.length());
+        	value=value.replace("\n", "");//规范sql，避免or 1= \n 1 这种
+        	value=value.replace("  ", " ");//多个空格替换掉，比较规范的sql
+        	String _value = value.substring(a + 4, value.length());
             String[] sp = _value.split("=");
             if (sp.length > 1) {
                 String[] sp1 = sp[1].split(" ");
                 if(sp1.length>0){
                     if (sp[0].trim().equals(sp1[0].trim())) {
-                        throw new EasyBoxCheckException(e);// 在or后面紧跟着1=1这种语法
+                        throw new EasyBoxCheckException("想注入？");// 在or后面紧跟着1=1这种语法
                     }
                 }
 
@@ -45,7 +47,7 @@ public class EasyBoxSecurity {
      */
     public static void checkJavaBean(Object obj, boolean isNull) {
         if (obj == null) {
-            throw new EasyBoxCheckException("有必输项未填写，请检查");
+            throw new EasyBoxCheckException("Some required items are not filled in, please check");
         }
         Field[] mField = obj.getClass().getDeclaredFields();
         for (Field field : mField) {
@@ -70,7 +72,7 @@ public class EasyBoxSecurity {
             if (value == null||EasyBoxStringUtil.isBlank(value.toString())) {
                 if (mCheckJavaBean.notNull()) {
                     if (isNull) {
-                        throw new EasyBoxCheckException(title + "不可为空");
+                        throw new EasyBoxCheckException(title + " 不可为空");
                     }
                 }
 
@@ -81,19 +83,19 @@ public class EasyBoxSecurity {
                 try {
                     d=Double.valueOf(value.toString());
                 } catch (NumberFormatException e) {
-                    throw new EasyBoxCheckException(title + "错误，只能输入数字");
+                    throw new EasyBoxCheckException(title + "只能输入数字");
                 }
                 if(d>mCheckJavaBean.numberMax()) {
-                    throw new EasyBoxCheckException(title + "错误，最大值为"+mCheckJavaBean.numberMax());
+                    throw new EasyBoxCheckException(title + "最大值为"+mCheckJavaBean.numberMax());
                 }
                 if(d<mCheckJavaBean.numberMin()) {
-                    throw new EasyBoxCheckException(title + "错误，最小值为"+mCheckJavaBean.numberMin());
+                    throw new EasyBoxCheckException(title + "最小值为"+mCheckJavaBean.numberMin());
                 }
             }
             if(mCheckJavaBean.maxLength()>0) {
                 int length =value.toString().length();
                 if(length>mCheckJavaBean.maxLength()||length<mCheckJavaBean.minLength()) {
-                    throw new EasyBoxCheckException(title + "错误，长度应在"+mCheckJavaBean.minLength()+"-"+mCheckJavaBean.maxLength()+"之间");
+                    throw new EasyBoxCheckException(title + "长度应在"+mCheckJavaBean.minLength()+"-"+mCheckJavaBean.maxLength()+"之间");
                 }
             }
 

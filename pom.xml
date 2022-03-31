@@ -10,7 +10,7 @@
 	<name>easybox-boot</name>
 
 	<properties>
-		<spring.version>2.1.8.RELEASE</spring.version><!--spring -->
+		<spring.version>2.5.12</spring.version><!--spring -->
 		<freemarker.version>2.3.23</freemarker.version><!--代码模板 -->
 		<java.version>1.8</java.version><!--JDK -->
 		<jdbc.version>10.2.0.5.0</jdbc.version><!--数据库 -->
